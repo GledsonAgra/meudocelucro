@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biscoito de coco amanteigado: receita e custo | Meu Doce Lucro</title>
+<meta name="description" content="Receita de biscoito de coco amanteigado, macio por dentro e crocante por fora, com passo a passo e calculadora de custo por unidade para quem vende.">
+<link rel="stylesheet" href="../assets/estilo.css?v=14">
+<link rel="icon" href="../assets/logo.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Recipe",
+  "name": "Biscoito de coco amanteigado",
+  "author": { "@type": "Person", "name": "Gledson Agra" },
+  "description": "Biscoito de coco amanteigado, macio por dentro e crocante por fora, rendendo cerca de 35 unidades.",
+  "image": ["https://meudocelucro.com.br/imagens/biscoito-de-coco-amanteigado.jpg"],
+  "prepTime": "PT15M",
+  "cookTime": "PT20M",
+  "totalTime": "PT35M",
+  "recipeYield": "35 unidades",
+  "recipeCategory": "Biscoito",
+  "recipeCuisine": "Brasileira",
+  "recipeIngredient": [
+    "200 g de amido de milho (maisena)",
+    "130 g de farinha de trigo",
+    "130 g de açúcar",
+    "Coco ralado a gosto (usei 50 g de referência)",
+    "200 g de manteiga"
+  ],
+  "recipeInstructions": [
+    { "@type": "HowToStep", "text": "Misture todos os ingredientes até virar uma massa homogênea, que não grude nas mãos." },
+    { "@type": "HowToStep", "text": "Faça pequenas bolinhas e amasse cada uma até ganhar formato de biscoito." },
+    { "@type": "HowToStep", "text": "Leve ao forno (untado ou forrado com papel vegetal) a 200°C. Observe o fundo do biscoito: quando ganhar um tom dourado de assado, está pronto. O tempo varia de forno para forno." }
+  ]
+}
+</script>
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <a href="../index.html" class="marca"><img src="../assets/logo.png" alt="Meu Doce Lucro"></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="../index.html">Receitas</a></li>
+        <li><a href="../calcular.html">Calcular custo</a></li>
+        <li><a href="../fichas.html">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <article class="faixa-estreita">
+    <h1>Biscoito de coco amanteigado</h1>
+
+    <div class="imagem-espaco-receita"></div>
+
+    <div class="meta-receita">
+      <span>⏱ Tempo de preparo<strong>35 min</strong></span>
+      <span>🍽 Rendimento<strong>35 unidades</strong></span>
+    </div>
+
+    <p>
+      Biscoitinho amanteigado de coco, macio por dentro e com aquela
+      base douradinha. Massa simples, de misturar e assar, boa pra
+      fazer em grande quantidade.
+    </p>
+
+    <div class="cartao" style="text-align:center; margin: 1.5em 0;">
+      <p style="margin-bottom:0.75em;"><strong>Já sabe fazer, mas não sabe quanto cobrar?</strong></p>
+      <a class="btn btn-primario btn-bloco" href="../calcular.html?receita=biscoito-de-coco-amanteigado">
+        Calcular o custo desta receita
+      </a>
+      <p class="dica" style="margin-top:0.6em; margin-bottom:0;">
+        Abre a calculadora já com os ingredientes preenchidos, falta só você informar os preços.
+      </p>
+    </div>
+
+    <h2>Ingredientes</h2>
+    <ul class="lista-ingredientes">
+      <li>200 g de amido de milho (maisena)</li>
+      <li>130 g de farinha de trigo</li>
+      <li>130 g de açúcar</li>
+      <li>Coco ralado a gosto (usei 50 g de referência)</li>
+      <li>200 g de manteiga</li>
+    </ul>
+
+    <h2>Modo de preparo</h2>
+    <ol class="passos-preparo">
+      <li>Misture todos os ingredientes até virar uma massa homogênea, que não grude nas mãos.</li>
+      <li>Faça pequenas bolinhas e amasse cada uma até ganhar formato de biscoito.</li>
+      <li>Leve ao forno (untado ou forrado com papel vegetal) a 200°C. Observe o fundo do biscoito: quando ganhar um tom dourado de assado, está pronto. O tempo varia de forno para forno.</li>
+    </ol>
+    <p class="dica">Dica: peneire as farinhas e junte o açúcar primeiro, para só depois juntar a manteiga.</p>
+
+    <div class="cartao" style="text-align:center;">
+      <a class="btn btn-primario btn-bloco" href="../calcular.html?receita=biscoito-de-coco-amanteigado">
+        Calcular o custo desta receita
+      </a>
+    </div>
+  </article>
+</main>
+
+<footer class="rodape">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra
+</footer>
+
+<script src="../assets/receitas.js?v=3"></script>
+<script src="../assets/app.js?v=3"></script>
+<script>
+  // Acha a foto desta receita: veja a explicação completa no mesmo
+  // trecho em receitas/alfajor.html.
+  (function () {
+    var arquivo = window.location.pathname.split("/").pop();
+    var receita = (typeof RECEITAS !== "undefined" ? RECEITAS : []).filter(function (r) {
+      return r.url.indexOf(arquivo) !== -1;
+    })[0];
+    var espaco = document.querySelector(".imagem-espaco-receita");
+    if (!receita || !receita.foto || !espaco) return;
+    var img = document.createElement("img");
+    img.src = "../assets-fotos/" + receita.foto;
+    img.alt = receita.titulo;
+    img.loading = "lazy";
+    img.onerror = function () { img.remove(); };
+    espaco.appendChild(img);
+  })();
+</script>
+</body>
+</html>

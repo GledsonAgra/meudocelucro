@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolo de rosquinha Mabel: receita e custo | Meu Doce Lucro</title>
+<meta name="description" content="Receita de bolo de rosquinha Mabel, simples de liquidificador, com passo a passo e calculadora de custo por fatia para quem vende.">
+<link rel="stylesheet" href="../assets/estilo.css?v=14">
+<link rel="icon" href="../assets/logo.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Recipe",
+  "name": "Bolo de rosquinha Mabel",
+  "author": { "@type": "Person", "name": "Gledson Agra" },
+  "description": "Bolo de rosquinha Mabel, simples de liquidificador, rendendo cerca de 12 fatias.",
+  "image": ["https://meudocelucro.com.br/imagens/bolo-de-rosquinha-mabel.jpg"],
+  "prepTime": "PT10M",
+  "cookTime": "PT25M",
+  "totalTime": "PT35M",
+  "recipeYield": "12 fatias",
+  "recipeCategory": "Bolo",
+  "recipeCuisine": "Brasileira",
+  "recipeIngredient": [
+    "500 g de rosquinha Mabel (pode ser a de chocolate)",
+    "2 xícaras de leite (480 ml)",
+    "1 tampinha de fermento em pó"
+  ],
+  "recipeInstructions": [
+    { "@type": "HowToStep", "text": "Misture as rosquinhas com o leite e mexa bem até virar uma massa homogênea." },
+    { "@type": "HowToStep", "text": "Adicione o fermento e misture mais um pouco, para incorporar." },
+    { "@type": "HowToStep", "text": "Unte uma assadeira com furo no meio." },
+    { "@type": "HowToStep", "text": "Leve ao forno pré-aquecido a 180°C por 20 a 25 minutos." }
+  ]
+}
+</script>
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <a href="../index.html" class="marca"><img src="../assets/logo.png" alt="Meu Doce Lucro"></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="../index.html">Receitas</a></li>
+        <li><a href="../calcular.html">Calcular custo</a></li>
+        <li><a href="../fichas.html">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <article class="faixa-estreita">
+    <h1>Bolo de rosquinha Mabel</h1>
+
+    <div class="imagem-espaco-receita"></div>
+
+    <div class="meta-receita">
+      <span>⏱ Tempo de preparo<strong>35 min</strong></span>
+      <span>🍽 Rendimento<strong>12 fatias</strong></span>
+    </div>
+
+    <p>
+      Bolo simples de liquidificador, feito só com rosquinha Mabel,
+      leite e fermento. Três ingredientes, sem segredo, ótimo pra quem
+      quer produzir rápido.
+    </p>
+
+    <div class="cartao" style="text-align:center; margin: 1.5em 0;">
+      <p style="margin-bottom:0.75em;"><strong>Já sabe fazer, mas não sabe quanto cobrar?</strong></p>
+      <a class="btn btn-primario btn-bloco" href="../calcular.html?receita=bolo-de-rosquinha-mabel">
+        Calcular o custo desta receita
+      </a>
+      <p class="dica" style="margin-top:0.6em; margin-bottom:0;">
+        Abre a calculadora já com os ingredientes preenchidos, falta só você informar os preços.
+      </p>
+    </div>
+
+    <h2>Ingredientes</h2>
+    <ul class="lista-ingredientes">
+      <li>500 g de rosquinha Mabel (pode ser a de chocolate)</li>
+      <li>2 xícaras de leite (480 ml)</li>
+      <li>1 tampinha de fermento em pó</li>
+    </ul>
+
+    <h2>Modo de preparo</h2>
+    <ol class="passos-preparo">
+      <li>Misture as rosquinhas com o leite e mexa bem até virar uma massa homogênea.</li>
+      <li>Adicione o fermento e misture mais um pouco, para incorporar.</li>
+      <li>Unte uma assadeira com furo no meio.</li>
+      <li>Leve ao forno pré-aquecido a 180°C por 20 a 25 minutos.</li>
+    </ol>
+
+    <div class="cartao" style="text-align:center;">
+      <a class="btn btn-primario btn-bloco" href="../calcular.html?receita=bolo-de-rosquinha-mabel">
+        Calcular o custo desta receita
+      </a>
+    </div>
+  </article>
+</main>
+
+<footer class="rodape">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra
+</footer>
+
+<script src="../assets/receitas.js?v=3"></script>
+<script src="../assets/app.js?v=3"></script>
+<script>
+  // Acha a foto desta receita: veja a explicação completa no mesmo
+  // trecho em receitas/alfajor.html.
+  (function () {
+    var arquivo = window.location.pathname.split("/").pop();
+    var receita = (typeof RECEITAS !== "undefined" ? RECEITAS : []).filter(function (r) {
+      return r.url.indexOf(arquivo) !== -1;
+    })[0];
+    var espaco = document.querySelector(".imagem-espaco-receita");
+    if (!receita || !receita.foto || !espaco) return;
+    var img = document.createElement("img");
+    img.src = "../assets-fotos/" + receita.foto;
+    img.alt = receita.titulo;
+    img.loading = "lazy";
+    img.onerror = function () { img.remove(); };
+    espaco.appendChild(img);
+  })();
+</script>
+</body>
+</html>
