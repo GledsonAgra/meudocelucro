@@ -1,0 +1,84 @@
+/*
+  IMPRESSAO.CSS — folha de estilo separada, usada só quando a página é
+  impressa (window.print()) ou exportada como PDF pelo próprio navegador.
+
+  Por que separada da estilo.css?
+  Porque tela e papel têm regras diferentes: na tela queremos cor de
+  fundo, botões, menu fixo no topo. No papel, isso tudo é desperdício
+  de tinta e confunde quem recebeu a folha. Este arquivo só é lido
+  pelo navegador no momento de imprimir (veja o media="print" no
+  <link> de cada página).
+*/
+
+@media print {
+  /* Esconde tudo que é só de tela: menu, botões, formulário, rodapé do site. */
+  .somente-tela {
+    display: none !important;
+  }
+
+  /* Mostra só a área de impressão, que o app.js preenche na hora
+     de imprimir uma ficha ou o caderno inteiro. */
+  .somente-impressao {
+    display: block !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  a { color: #000; text-decoration: none; }
+
+  /* Cada ficha do caderno completo vira uma folha de papel própria. */
+  .pagina-impressao {
+    page-break-after: always;
+    padding: 0;
+  }
+  .pagina-impressao:last-child {
+    page-break-after: auto;
+  }
+
+  .ficha-impressao h1 {
+    font-size: 20pt;
+    margin-bottom: 0.2em;
+  }
+  .ficha-impressao table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+  }
+  .ficha-impressao th,
+  .ficha-impressao td {
+    border: 1px solid #999;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 10.5pt;
+  }
+  .ficha-impressao .resumo-final {
+    margin-top: 1em;
+    border-top: 2px solid #000;
+    padding-top: 0.6em;
+  }
+  .ficha-impressao .resumo-final .linha {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12pt;
+    margin-bottom: 0.3em;
+  }
+  .ficha-impressao .resumo-final .linha.principal {
+    font-weight: 700;
+    font-size: 14pt;
+  }
+
+  /* Rodapé de marca em toda folha impressa: se essa ficha for parar
+     na mão de uma cliente ou de um fornecedor, o site viaja junto. */
+  .rodape-impressao {
+    margin-top: 1.5em;
+    padding-top: 0.6em;
+    border-top: 1px solid #999;
+    font-size: 9pt;
+    color: #444;
+    text-align: center;
+  }
+}

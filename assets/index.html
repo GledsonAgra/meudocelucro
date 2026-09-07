@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Doce Lucro — receitas e calculadora de custo para quem vende comida caseira</title>
+<meta name="description" content="Receitas de bolo, doce, salgado e marmita, com um clique direto para calcular quanto custa fazer e por quanto vender.">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <a href="index.html" class="marca">Meu Doce<span>Lucro</span></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="index.html" aria-current="page">Receitas</a></li>
+        <li><a href="calcular.html">Calcular custo</a></li>
+        <li><a href="fichas.html">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <!--
+    "cabecalho-pagina" no lugar de "faixa-estreita": mantém a linha de
+    leitura curta, mas encostada na esquerda, na mesma linha vertical em
+    que a grade de receitas começa. Com "faixa-estreita" o texto ficava
+    centralizado em 640px enquanto a grade ocupava 900px, e o título
+    nascia deslocado à direita do primeiro cartão.
+  -->
+  <section class="cabecalho-pagina">
+    <h1>Receitas que já vêm com a conta certa</h1>
+    <p>Escolha uma receita, siga o passo a passo e, quando quiser saber
+    quanto custa fazer e por quanto vender, é um botão só — de graça,
+    sem mensalidade.</p>
+  </section>
+
+  <section aria-label="Lista de receitas">
+    <div class="grade-receitas" id="grade-receitas">
+      <!-- Preenchido pelo JavaScript abaixo, a partir de assets/receitas.js -->
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra<br>
+  Seus dados de cálculo ficam salvos só neste aparelho, no seu navegador.
+</footer>
+
+<script src="assets/receitas.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  // Monta os cartões da home a partir da lista em assets/receitas.js.
+  // Fazer isso por JavaScript evita repetir o mesmo bloco de HTML de
+  // cartão em vários lugares: some uma receita nova só na lista, e o
+  // cartão aparece aqui sozinho.
+  (function () {
+    var grade = document.getElementById("grade-receitas");
+    var html = RECEITAS.map(function (receita) {
+      return (
+        '<a class="receita-card" href="' + receita.url + '">' +
+          '<div class="imagem-espaco">[ foto da receita ]</div>' +
+          '<div class="conteudo">' +
+            "<h2>" + receita.titulo + "</h2>" +
+            "<p>" + receita.resumo + "</p>" +
+            // Sem emoji: no Windows o relógio e o prato saem
+            // monocromáticos e fora de linha, e é o tipo de detalhe que
+            // faz o site parecer improvisado. Ponto médio resolve.
+            '<div class="meta">' +
+              "<span>" + receita.tempoPreparo + " · rende " +
+                receita.rendimento + " " + receita.unidadeRendimento + "</span>" +
+            "</div>" +
+            // A linha abaixo é o que separa este site de qualquer blog de
+            // receita. Sem ela, o cartão promete só o preparo, e a
+            // manchete lá em cima fica sem prova na primeira tela.
+            '<div class="chamada-custo">Ver quanto custa fazer</div>' +
+          "</div>" +
+        "</a>"
+      );
+    }).join("");
+    grade.innerHTML = html;
+  })();
+</script>
+</body>
+</html>

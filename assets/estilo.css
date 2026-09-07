@@ -1,0 +1,714 @@
+/*
+  ESTILO.CSS — folha de estilo única, compartilhada por todo o site.
+
+  Por que uma folha só, e não uma por página?
+  Porque o site não tem etapa de build (sem Sass, sem empacotador).
+  Se cada página tivesse seu próprio CSS, qualquer ajuste de cor ou
+  espaçamento teria que ser repetido em vários arquivos. Com uma
+  folha só, muda aqui e todas as páginas atualizam juntas.
+*/
+
+/* ---------- 1. Fontes ----------
+   Fraunces para títulos (mais expressiva, "com personalidade").
+   Figtree para texto corrido (mais neutra, fácil de ler no celular). */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,600&family=Figtree:wght@400;500;600;700&display=swap');
+
+/* ---------- 2. Paleta de cores ----------
+   Só estas 6 cores existem no site — são as oficiais do Manual de
+   Identidade Visual. Nenhum outro tom de hexadecimal deveria aparecer
+   em nenhum lugar deste arquivo.
+
+   Em RGB, pra quem precisar montar sombra/borda mais adiante:
+     --cacau     90,  36, 21
+     --ambar    233, 154, 24
+     --creme    255, 247, 232
+     --caramelo 201, 120, 24
+     --cafe      50,  21, 14
+     --verde     79, 122, 69
+
+   Regra de uso do manual, sem exceção:
+   · ÂMBAR PREENCHE, CARAMELO ESCREVE. O âmbar #E99A18 é lindo como
+     fundo de botão/destaque/faixa, mas como cor de LETRA sobre fundo
+     claro o contraste é baixo demais — quem lê no celular no sol não
+     enxerga. Por isso âmbar nunca é texto: onde o manual pede "âmbar
+     escrito", usamos caramelo #C97818, que é a mesma família de cor
+     mas escura o bastante pra ler.
+   · Cacau é a cor da marca: cabeçalho, rodapé, títulos, links.
+   · Verde é exclusivo de lucro/resultado positivo — não aparece em
+     botão, link ou borda decorativa que não seja isso.
+   · Custo e preço são sempre âmbar/caramelo; lucro é sempre verde.
+     Essas duas coisas nunca trocam de cor entre si.
+
+   Você vai ver várias bordas, divisórias e sombras escritas como
+   "rgba(90, 36, 21, 0.18)" em vez de uma variável nova. Não é uma
+   sétima cor: são exatamente os números do --cacau (ou do --cafe,
+   ou do --ambar) com transparência, pra criar um traço mais suave
+   sem sair da paleta de 6 cores. */
+:root {
+  --cacau:     #5A2415;
+  --ambar:     #E99A18;
+  --creme:     #FFF7E8;
+  --caramelo:  #C97818;
+  --cafe:      #32150E;
+  --verde:     #4F7A45;
+
+  --sombra: 0 2px 10px rgba(50, 21, 14, 0.08); /* --cafe bem clarinho, só uma sombra suave */
+  --raio: 14px;
+  --fonte-titulo: 'Fraunces', Georgia, serif;
+  --fonte-corpo: 'Figtree', system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- 3. Reset básico ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--creme);
+  color: var(--cafe);
+  font-family: var(--fonte-corpo);
+  font-size: 17px;
+  line-height: 1.5;
+}
+h1, h2, h3, h4 {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--cacau);
+  margin: 0 0 0.5em;
+}
+p { margin: 0 0 1em; }
+img { max-width: 100%; display: block; border-radius: var(--raio); }
+a { color: var(--cacau); }
+
+/* Números de dinheiro sempre alinhados em coluna — dígitos com a
+   mesma largura, senão R$ 9,90 e R$ 19,90 ficam "tortos" um do outro. */
+.numero, .moeda, td.numero {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 4. Acessibilidade obrigatória ---------- */
+
+/* Link "pular para o conteúdo", só aparece quando recebe foco de teclado. */
+.pular-conteudo {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--cacau);
+  color: var(--creme);
+  padding: 0.75em 1em;
+  z-index: 100;
+  border-radius: 0 0 8px 0;
+}
+.pular-conteudo:focus {
+  left: 0;
+}
+
+/* Foco de teclado sempre visível — nunca "outline: none" sem repor algo. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--cacau);
+  outline-offset: 2px;
+}
+
+/* Quem usa "reduzir movimento" no aparelho não deve ver transições/animações. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 5. Cabeçalho e navegação ----------
+   Ordem fixa em todas as páginas: Receitas → Calcular custo → Ficha técnica.
+   É a ordem em que a pessoa realmente usa o site, do conteúdo até o resultado. */
+.topo {
+  background: var(--creme);
+  border-bottom: 1px solid rgba(90, 36, 21, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topo-conteudo {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0.85em 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem; /* mínimo de 32px entre a logo e o menu */
+  flex-wrap: wrap;
+}
+.marca {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--cacau);
+  text-decoration: none;
+  white-space: nowrap;
+}
+/* O espaço entre "Meu Doce" e "Lucro" é feito aqui, e não no HTML, para
+   valer em todas as páginas de uma vez sem editar arquivo por arquivo.
+   (Só entra em ação nas páginas que ainda usam a marca em texto — as
+   quatro páginas com logo em imagem não têm mais esse <span>.) */
+.marca span {
+  color: var(--caramelo);
+  margin-left: 0.22em;
+}
+/* Logo em imagem: altura fixa e largura livre, pra nunca distorcer.
+   68px no desktop, 52px no celular. */
+.marca img {
+  height: 68px;
+  width: auto;
+  display: block;
+  border-radius: 0;
+}
+@media (max-width: 639px) {
+  .marca img { height: 52px; }
+}
+
+.nav-principal {
+  display: flex;
+  gap: 0.25em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.nav-principal a {
+  display: inline-block;
+  padding: 0.6em 0.9em;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--cafe);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+/* Fundo do cabeçalho e da página são o mesmo creme agora, então o hover
+   precisa de um tom próprio (cacau bem clarinho) — se usasse --creme
+   aqui, o hover ficaria invisível. */
+.nav-principal a:hover { background: rgba(90, 36, 21, 0.08); }
+.nav-principal a[aria-current="page"] {
+  background: var(--cacau);
+  color: var(--creme);
+}
+
+/* ---------- 6. Estrutura geral de página ----------
+   1120px de teto, com 24px de respiro fixo dos dois lados — antes eram
+   900px e sobrava vazio nas telas grandes. */
+main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0.8em 24px 3em;
+}
+/* Colunas de texto (receita, calculadora, fichas) continuam com largura
+   de leitura curta — isso é sobre legibilidade, não sobre a largura
+   do site, então não muda junto com o main. */
+.faixa-estreita { max-width: 640px; margin: 0 auto; }
+
+/* Cabeçalho de página em tela larga (usado na home).
+   Mantém a linha de leitura curta, mas encostado na ESQUERDA, na mesma
+   linha vertical onde a grade de receitas começa. Antes, o texto ficava
+   centralizado em 640px e a grade ocupava 900px: o título nascia uns
+   130px à direita do primeiro cartão, e a página parecia torta. */
+.cabecalho-pagina {
+  max-width: 640px;
+  margin: 0 0 1.75em;
+}
+
+.rodape {
+  border-top: 1px solid rgba(90, 36, 21, 0.18);
+  text-align: center;
+  padding: 2em 1em;
+  color: var(--cafe);
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+/* ---------- 7. Cartões (usados na home, na calculadora e nas fichas) ---------- */
+.cartao {
+  background: var(--creme);
+  border: 1px solid rgba(90, 36, 21, 0.18);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+/* ---------- 8. Botões ----------
+   Alvo de toque grande (mínimo ~44px) porque quem usa isso está
+   com o celular na mão suja de farinha — precisão baixa no toque. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 48px;
+  padding: 0.7em 1.4em;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-family: var(--fonte-corpo);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+.btn:active { transform: scale(0.98); }
+
+/* Botão principal em âmbar, como manda o manual. A letra é café e não
+   branca: branco sobre âmbar quase some no sol. */
+.btn-primario {
+  background: var(--ambar);
+  color: var(--cafe);
+}
+.btn-primario:hover { background: var(--caramelo); }
+
+/* Botão secundário: fundo transparente, borda e letra em cacau — exatamente
+   como pede o manual. */
+.btn-secundario {
+  background: transparent;
+  color: var(--cacau);
+  border-color: var(--cacau);
+}
+.btn-secundario:hover { background: rgba(90, 36, 21, 0.08); }
+
+/* Botão de ação destrutiva (excluir). O manual não prevê uma cor de
+   "alerta" separada, então usamos --cafe (o tom mais escuro da paleta)
+   pra dar um peso visual diferente do botão secundário comum, sem
+   inventar uma sétima cor. */
+.btn-perigo {
+  background: transparent;
+  color: var(--cafe);
+  border-color: var(--cafe);
+}
+.btn-perigo:hover { background: rgba(50, 21, 14, 0.08); }
+
+.btn-bloco { width: 100%; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- 9. Formulários ---------- */
+.campo { margin-bottom: 1em; }
+.campo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35em;
+  font-size: 0.95rem;
+}
+.campo .dica {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-top: 0.3em;
+}
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.6em 0.8em;
+  border: 2px solid rgba(90, 36, 21, 0.45);
+  border-radius: 10px;
+  background: var(--creme);
+  color: var(--cafe);
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+}
+input:focus, select:focus { border-color: var(--cacau); }
+/* Texto de exemplo (placeholder) com opacidade fixa, em vez de confiar
+   no cinza padrão do navegador — que em alguns navegadores fica claro
+   demais sobre o creme e passa a impressão de campo desabilitado. */
+input::placeholder { color: var(--cafe); opacity: 0.45; }
+
+/* Campo de dinheiro: "R$" fixo do lado de fora do campo, pra nunca
+   sobrar dúvida de que é reais — a pessoa só digita o número. */
+.campo-moeda { position: relative; }
+.campo-moeda .prefixo-moeda {
+  position: absolute;
+  left: 0.8em;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cafe);
+  opacity: 0.6;
+  font-weight: 600;
+  pointer-events: none;
+}
+.campo-moeda input { padding-left: 2.5em; }
+
+/* ---------- 10. Linha de ingrediente na calculadora ----------
+   Em telas largas os 4 campos ficam lado a lado; em telas estreitas
+   (celular) empilham. 360px é a largura mínima que precisamos suportar. */
+.linha-ingrediente {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75em;
+  padding: 1em;
+  border: 1px solid rgba(90, 36, 21, 0.18);
+  border-radius: var(--raio);
+  margin-bottom: 0.9em;
+  background: var(--creme);
+}
+@media (min-width: 640px) {
+  .linha-ingrediente {
+    grid-template-columns: 1.3fr 1fr 0.8fr 0.6fr 0.8fr 0.6fr auto;
+    align-items: end;
+  }
+}
+.linha-ingrediente .campo { margin-bottom: 0; }
+
+.remover-linha {
+  background: transparent;
+  border: none;
+  color: var(--cacau);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.5em;
+  min-height: 44px;
+  border-radius: 8px;
+}
+.remover-linha:hover { background: rgba(90, 36, 21, 0.08); }
+
+/* ---------- 11. Avisos ----------
+   Três tons: neutro (info), verde (coisa boa) e âmbar/caramelo (atenção
+   ao custo). Não existe vermelho na paleta — "atenção" aqui é a mesma
+   família de cor do dinheiro subindo, não uma cor de alarme à parte. */
+.aviso {
+  border-radius: var(--raio);
+  padding: 1em 1.1em;
+  margin-bottom: 1.1em;
+  font-size: 0.95rem;
+  border: 1px solid rgba(90, 36, 21, 0.18);
+  background: var(--creme);
+}
+.aviso-lucro {
+  background: rgba(79, 122, 69, 0.12);
+  border-color: var(--verde);
+  color: var(--verde);
+}
+.aviso-alerta {
+  background: rgba(233, 154, 24, 0.18);
+  border-color: var(--caramelo);
+  color: var(--cafe);
+}
+
+/* ---------- 12. Resultado em destaque ----------
+   O custo por unidade é o número mais importante da tela: precisa ser
+   visto sem esforço, mesmo por quem só bateu o olho na tela.
+   Em âmbar/caramelo porque, no manual, custo e preço são âmbar — o
+   verde fica reservado para o que sobra no bolso. */
+.resultado-destaque {
+  text-align: center;
+  padding: 1.5em 1em;
+  background: var(--creme);
+  border: 2px solid var(--ambar);
+  border-radius: var(--raio);
+  margin-bottom: 1.25em;
+}
+.resultado-destaque .rotulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.resultado-destaque .valor {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(2.2rem, 8vw, 3.2rem);
+  color: var(--caramelo);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* ---------- 13. Botões de margem (30/40/50/60%) ---------- */
+.grade-margens {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6em;
+  margin-bottom: 0.5em;
+}
+@media (min-width: 480px) {
+  .grade-margens { grid-template-columns: repeat(4, 1fr); }
+}
+.opcao-margem {
+  border: 2px solid rgba(90, 36, 21, 0.25);
+  background: var(--creme);
+  border-radius: 12px;
+  padding: 0.8em 0.5em;
+  text-align: center;
+  cursor: pointer;
+  color: var(--cafe);
+  font-family: var(--fonte-corpo);
+}
+.opcao-margem .percentual { font-weight: 700; display: block; }
+.opcao-margem .preco {
+  font-family: var(--fonte-titulo);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+.opcao-margem[aria-pressed="true"] {
+  border-color: var(--ambar);
+  background: rgba(233, 154, 24, 0.15);
+}
+
+/* ---------- 14. Bloco de afiliado ----------
+   Só some na tela quando não há sugestão relevante — nunca fica vazio
+   nem aparece antes do resultado do cálculo. */
+.bloco-afiliado {
+  border: 1px dashed rgba(90, 36, 21, 0.3);
+  border-radius: var(--raio);
+  padding: 1.1em;
+  background: var(--creme);
+}
+.bloco-afiliado h3 { font-size: 1.05rem; margin-bottom: 0.5em; }
+.bloco-afiliado ul { margin: 0; padding-left: 1.2em; }
+.bloco-afiliado li { margin-bottom: 0.4em; }
+.bloco-afiliado .aviso-parceria {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 0.6em;
+  margin-bottom: 0;
+}
+
+/* ---------- 14b. Faixa de abertura (home) ----------
+   Largura total, fora do <main>, por isso o fundo cacau vai de ponta a
+   ponta — só o texto de dentro fica centrado em 1120px, como o resto
+   do site. */
+.faixa-abertura {
+  background: var(--cacau);
+  color: var(--creme);
+  padding: 18px 24px;
+}
+.faixa-abertura-conteudo {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.faixa-abertura h1 {
+  color: var(--creme);
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  max-width: 26ch;
+  margin-bottom: 0.3em;
+}
+.faixa-abertura p {
+  font-size: 0.98rem;
+  max-width: 50ch;
+  opacity: 0.92;
+  margin-bottom: 0.8em;
+}
+
+/* ---------- 15. Home / lista de receitas ----------
+   Uma coluna até 700px; dali pra cima, "auto-fill" enche a largura
+   disponível com quantos cartões de 220px couberem. Com a foto
+   quadrada, cartão largo vira foto gigante (a altura acompanha a
+   largura), então cartões menores mantêm a foto num tamanho razoável. */
+.grade-receitas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8em;
+}
+@media (min-width: 701px) {
+  .grade-receitas { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+.receita-card {
+  background: var(--creme);
+  border: 1px solid rgba(90, 36, 21, 0.18);
+  border-radius: var(--raio);
+  overflow: hidden;
+  box-shadow: var(--sombra);
+  text-decoration: none;
+  color: var(--cafe);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  /* Coluna flexível: assim dá pra grudar o selinho de custo sempre no
+     rodapé do cartão (veja .chamada-custo), em vez dele ficar mais alto
+     ou mais baixo dependendo de quanto texto o cartão tem acima. */
+  display: flex;
+  flex-direction: column;
+}
+/* Elevação leve ao passar o mouse — só um convite pra clicar, nada
+   chamativo demais. */
+.receita-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(50, 21, 14, 0.16);
+}
+/* Quadrada (1/1): as fotos são enviadas já quadradas, e um formato
+   retangular cortava a parte de cima/baixo da imagem.
+   O degradê é o fundo padrão, some sozinho quando a foto carrega, e
+   fica visível se a foto não existir (veja o onerror no index.html). */
+.receita-card .imagem-espaco {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, rgba(233, 154, 24, 0.18), rgba(233, 154, 24, 0.05));
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.receita-card .imagem-espaco img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+.receita-card .conteudo {
+  padding: 0.85em 1em 1em;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+/* Título e resumo travados em 2 linhas: sem isso, um título maior que
+   o outro deixava os cartões com alturas diferentes, agora todos
+   ficam do mesmo tamanho, e o texto que não coube corta com "…". */
+.receita-card h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.2em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.receita-card .resumo {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.6em;
+}
+/* Tempo e rendimento empilhados, cada um na sua própria linha: assim
+   fica igual em todo cartão, mesmo quando um rendimento tem texto
+   mais longo que o outro (ex.: "8 pacotes de 100g" x "30 unidades").
+   margin-top: auto empurra esse bloco pro rodapé do cartão, sempre na
+   mesma distância da borda de baixo. */
+.receita-card .meta {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  margin-top: auto;
+  margin-bottom: 0.4em;
+}
+/* A chamada de custo é a única coisa colorida do cartão, e é de propósito:
+   o olho pousa nela e entende, em meio segundo, o que este site faz de
+   diferente de um blog de receita. Vira um selinho em âmbar claro:
+   âmbar como fundo, caramelo como letra, nunca o contrário. */
+.receita-card .chamada-custo {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.35em 0.85em;
+  border-radius: 999px;
+  background: rgba(233, 154, 24, 0.22);
+  color: var(--caramelo);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ---------- 16. Página de receita ----------
+   Mesma lógica da home: degradê como fundo padrão, foto por cima quando
+   existe (veja o script no fim de cada página de receita). */
+.imagem-espaco-receita {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, rgba(233, 154, 24, 0.18), rgba(233, 154, 24, 0.05));
+  margin-bottom: 1em;
+  border-radius: var(--raio);
+  overflow: hidden;
+}
+.imagem-espaco-receita img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+.meta-receita {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+  margin-bottom: 1.25em;
+  font-size: 0.95rem;
+}
+.meta-receita strong { display: block; font-size: 1.1rem; color: var(--cacau); }
+.lista-ingredientes {
+  list-style: none;
+  margin: 0 0 1.5em;
+  padding: 0;
+}
+.lista-ingredientes li {
+  padding: 0.6em 0;
+  border-bottom: 1px solid rgba(90, 36, 21, 0.18);
+}
+.passos-preparo {
+  padding-left: 1.3em;
+}
+.passos-preparo li { margin-bottom: 0.9em; }
+
+/* ---------- 17. Lista de fichas salvas ---------- */
+.ficha-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1em;
+  flex-wrap: wrap;
+}
+.ficha-card .acoes {
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+.ficha-card .numeros { text-align: right; }
+/* Custo por unidade: sempre âmbar/caramelo, nunca verde — só o lucro é verde. */
+.ficha-card .numeros .custo {
+  font-family: var(--fonte-titulo);
+  font-size: 1.3rem;
+  color: var(--caramelo);
+}
+
+/* ---------- 18. Janela de cadastro ----------
+   Aparece uma única vez, no momento de salvar a ficha ou gerar o PDF —
+   nunca na entrada do site. A pessoa já viu o número dela na tela antes
+   de qualquer campo ser pedido. */
+.mdl-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(50, 21, 14, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em;
+  z-index: 200;
+}
+.mdl-caixa {
+  background: var(--creme);
+  border-radius: var(--raio);
+  padding: 1.5em 1.35em;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(50, 21, 14, 0.28);
+}
+.mdl-caixa h2 { font-size: 1.3rem; margin-bottom: 0.3em; }
+.mdl-caixa .mdl-intro {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-bottom: 1.2em;
+}
+/* Erro de formulário: mesma lógica do .btn-perigo — sem vermelho na
+   paleta, usamos --cafe (o tom mais escuro) pra marcar seriedade. */
+.mdl-caixa .mdl-erro {
+  color: var(--cafe);
+  font-size: 0.85rem;
+  margin: 0.3em 0 0;
+}
+.mdl-caixa .mdl-rodape {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 1em 0 0;
+}
+.mdl-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-top: 1.2em;
+}
+
+/* Utilitário: existe na tela mas some quando a página é impressa
+   (o conteúdo de impressão de verdade fica em #area-impressao). */
+.somente-tela { }
+.somente-impressao { display: none; }
