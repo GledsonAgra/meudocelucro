@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcular custo: Meu Doce Lucro</title>
+<meta name="description" content="Calculadora de custo e preço de venda para bolo, doce, salgado e marmita. Grátis, sem cadastro, direto no navegador.">
+<link rel="stylesheet" href="assets/estilo.css?v=14">
+<link rel="icon" href="assets/logo.png">
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <a href="index.html" class="marca"><img src="assets/logo.png" alt="Meu Doce Lucro"></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="index.html">Receitas</a></li>
+        <li><a href="calcular.html" aria-current="page">Calcular custo</a></li>
+        <li><a href="fichas.html">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <div class="faixa-estreita">
+
+    <h1 style="margin-bottom:0.2em;">Calcular custo</h1>
+    <p id="subtitulo-receita" style="opacity:0.8;"></p>
+
+    <div class="aviso aviso-info">
+      Seus dados ficam salvos só neste aparelho (no navegador). Se trocar
+      de celular ou limpar os dados do navegador, eles somem daqui.
+    </div>
+
+    <div class="campo">
+      <label for="campo-nome-produto">Nome do produto</label>
+      <input type="text" id="campo-nome-produto" placeholder="Ex.: Bolo de cenoura (fatia)">
+    </div>
+
+    <h2>Ingredientes</h2>
+    <div id="lista-ingredientes"><!-- linhas de ingrediente entram aqui via JS --></div>
+    <button type="button" class="btn btn-secundario" id="btn-add-ingrediente">+ Adicionar ingrediente</button>
+
+    <h2 style="margin-top:1.5em;">Custos extras</h2>
+    <p class="dica" style="margin-top:-0.5em;">
+      Embalagem, gás, energia, entrega... quase ninguém conta esses custos,
+      mas eles saem do seu bolso do mesmo jeito.
+    </p>
+    <div id="lista-extras"><!-- linhas de custo extra entram aqui via JS --></div>
+    <button type="button" class="btn btn-secundario" id="btn-add-extra">+ Adicionar custo extra</button>
+
+    <div class="campo" style="margin-top:1.5em;">
+      <label for="campo-rendimento">Rendimento: quantas unidades essa receita gera?</label>
+      <input type="number" id="campo-rendimento" min="1" step="1" placeholder="Ex.: 12" inputmode="numeric">
+      <p class="dica">Ex.: 12 fatias, 30 salgados, 8 marmitas.</p>
+    </div>
+
+    <button type="button" class="btn btn-primario btn-bloco" id="btn-calcular" style="margin:1em 0;">
+      Calcular custo
+    </button>
+
+    <div id="area-resultado" hidden>
+
+      <div class="aviso aviso-alerta" id="aviso-sem-embalagem" hidden>
+        Você não lançou nenhum custo de embalagem, o número abaixo está otimista.
+      </div>
+
+      <div id="aviso-historico"><!-- frase de comparação com o histórico, se houver --></div>
+
+      <div class="resultado-destaque">
+        <div class="rotulo">Custo por unidade</div>
+        <div class="valor numero" id="valor-custo-unidade">R$ 0,00</div>
+      </div>
+
+      <h2>Preço de venda sugerido</h2>
+      <p class="dica" style="margin-top:-0.5em;">
+        Margem sobre a venda não é a mesma coisa que multiplicar o custo:
+        aqui, a margem escolhida é a fatia que ela representa do PREÇO
+        final, não do seu custo.
+      </p>
+      <div class="grade-margens" id="grade-margens">
+        <!-- 4 botões de margem entram aqui via JS -->
+      </div>
+
+      <div class="cartao" id="bloco-afiliado-container" hidden>
+        <div class="bloco-afiliado">
+          <h3>Pode te ajudar</h3>
+          <ul id="lista-sugestoes-afiliado"></ul>
+          <p class="aviso-parceria">Alguns desses links são de parceria: se você comprar por eles, o Meu Doce Lucro pode ganhar uma comissão, sem custo extra para você.</p>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primario btn-bloco" id="btn-salvar-ficha" style="margin-top:1.25em;">
+        Salvar na ficha técnica
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<footer class="rodape">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra
+</footer>
+
+<script src="assets/receitas.js?v=3"></script>
+<script src="assets/app.js?v=3"></script>
+<script src="assets/cadastro.js?v=2"></script>
+<script>
+/*
+  Lógica da tela de calcular custo.
+
+  Por que este script fica direto no HTML da página (e não em app.js)?
+  Porque ele mexe muito no DOM específico desta tela (adicionar linha,
+  ler campo, mostrar resultado). app.js guarda só o que é reaproveitado
+  por mais de uma página (conversão de unidade, formatação, localStorage,
+  histórico, links de afiliado). Essa separação evita que app.js vire um
+  arquivo gigante e confuso.
+*/
+(function () {
+  "use strict";
+
+  var UNIDADES_PESO_VOLUME = ["g", "kg", "ml", "l", "un"];
+  var contadorLinha = 0;
+  var fichaEmEdicaoId = null; // se veio de "?ficha=", guardamos o id aqui
+
+  var listaIngredientesEl = document.getElementById("lista-ingredientes");
+  var listaExtrasEl = document.getElementById("lista-extras");
+
+  /* ---------- Construção das linhas de ingrediente ---------- */
+
+  function opcoesUnidade(selecionada) {
+    return UNIDADES_PESO_VOLUME.map(function (u) {
+      return '<option value="' + u + '"' + (u === selecionada ? " selected" : "") + ">" + u + "</option>";
+    }).join("");
+  }
+
+  function criarLinhaIngrediente(dados) {
+    dados = dados || {};
+    contadorLinha++;
+    var id = "ing" + contadorLinha;
+    var div = document.createElement("div");
+    div.className = "linha-ingrediente";
+    div.dataset.linhaId = id;
+    div.innerHTML =
+      '<div class="campo">' +
+        '<label for="' + id + '-nome">Ingrediente</label>' +
+        '<input type="text" id="' + id + '-nome" class="campo-nome" value="' + (dados.nome || "") + '" placeholder="Ex.: Farinha de trigo">' +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-preco">Preço da embalagem</label>' +
+        '<div class="campo-moeda">' +
+          '<span class="prefixo-moeda" aria-hidden="true">R$</span>' +
+          '<input type="text" id="' + id + '-preco" class="campo-preco" value="' + (dados.precoEmbalagem || "") + '" placeholder="5,49">' +
+        "</div>" +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-tamanho">Tamanho da embalagem</label>' +
+        '<input type="text" id="' + id + '-tamanho" class="campo-tamanho" value="' + (dados.tamanhoEmbalagem || "") + '" placeholder="1">' +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-unidade-embalagem">Unidade da embalagem</label>' +
+        '<select id="' + id + '-unidade-embalagem" class="campo-unidade-embalagem">' + opcoesUnidade(dados.unidadeEmbalagem || "kg") + "</select>" +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-usado">Quanto usa na receita</label>' +
+        '<input type="text" id="' + id + '-usado" class="campo-usado" value="' + (dados.quantidadeUsada || "") + '" placeholder="500">' +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-unidade-usada">Unidade usada</label>' +
+        '<select id="' + id + '-unidade-usada" class="campo-unidade-usada">' + opcoesUnidade(dados.unidadeUsada || "g") + "</select>" +
+      "</div>" +
+      '<button type="button" class="remover-linha" aria-label="Remover ingrediente">✕</button>';
+
+    div.querySelector(".remover-linha").addEventListener("click", function () {
+      div.remove();
+    });
+    listaIngredientesEl.appendChild(div);
+  }
+
+  function lerIngredientes() {
+    var linhas = listaIngredientesEl.querySelectorAll(".linha-ingrediente");
+    var lista = [];
+    linhas.forEach(function (linha) {
+      lista.push({
+        nome: linha.querySelector(".campo-nome").value,
+        precoEmbalagem: linha.querySelector(".campo-preco").value,
+        tamanhoEmbalagem: linha.querySelector(".campo-tamanho").value,
+        unidadeEmbalagem: linha.querySelector(".campo-unidade-embalagem").value,
+        quantidadeUsada: linha.querySelector(".campo-usado").value,
+        unidadeUsada: linha.querySelector(".campo-unidade-usada").value,
+      });
+    });
+    return lista;
+  }
+
+  /* ---------- Construção das linhas de custo extra ---------- */
+
+  var TIPOS_EXTRA = ["Embalagem", "Gás", "Energia", "Entrega", "Outro"];
+
+  function opcoesTipoExtra(selecionado) {
+    return TIPOS_EXTRA.map(function (t) {
+      return '<option value="' + t + '"' + (t === selecionado ? " selected" : "") + ">" + t + "</option>";
+    }).join("");
+  }
+
+  function criarLinhaExtra(dados) {
+    dados = dados || {};
+    contadorLinha++;
+    var id = "ext" + contadorLinha;
+    var div = document.createElement("div");
+    div.className = "linha-ingrediente";
+    div.dataset.linhaId = id;
+    div.innerHTML =
+      '<div class="campo">' +
+        '<label for="' + id + '-tipo">Tipo de custo</label>' +
+        '<select id="' + id + '-tipo" class="campo-tipo-extra">' + opcoesTipoExtra(dados.tipo || "Embalagem") + "</select>" +
+      "</div>" +
+      '<div class="campo">' +
+        '<label for="' + id + '-valor">Valor gasto nesta receita</label>' +
+        '<div class="campo-moeda">' +
+          '<span class="prefixo-moeda" aria-hidden="true">R$</span>' +
+          '<input type="text" id="' + id + '-valor" class="campo-valor-extra" value="' + (dados.valor || "") + '" placeholder="1,00">' +
+        "</div>" +
+      "</div>" +
+      '<button type="button" class="remover-linha" aria-label="Remover custo extra">✕</button>';
+
+    div.querySelector(".remover-linha").addEventListener("click", function () {
+      div.remove();
+    });
+    listaExtrasEl.appendChild(div);
+  }
+
+  function lerExtras() {
+    var linhas = listaExtrasEl.querySelectorAll(".linha-ingrediente");
+    var lista = [];
+    linhas.forEach(function (linha) {
+      lista.push({
+        tipo: linha.querySelector(".campo-tipo-extra").value,
+        valor: linha.querySelector(".campo-valor-extra").value,
+      });
+    });
+    return lista;
+  }
+
+  document.getElementById("btn-add-ingrediente").addEventListener("click", function () {
+    criarLinhaIngrediente();
+  });
+  document.getElementById("btn-add-extra").addEventListener("click", function () {
+    criarLinhaExtra();
+  });
+
+  /* ---------- Preenchimento inicial da tela ----------
+     Três situações possíveis ao abrir esta página:
+     1. "?ficha=ID"   → editar uma ficha já salva (vem da tela de fichas)
+     2. "?receita=ID" → vir de uma receita, com ingredientes pré-preenchidos
+     3. nenhuma das duas → tela em branco, com uma linha vazia para começar
+  */
+  var parametros = new URLSearchParams(window.location.search);
+  var idFicha = parametros.get("ficha");
+  var idReceita = parametros.get("receita");
+  var margemEscolhida = 0.5; // padrão pedido: 50%
+
+  if (idFicha) {
+    var ficha = MDL.obterFichaPorId(idFicha);
+    if (ficha) {
+      fichaEmEdicaoId = ficha.id;
+      document.getElementById("campo-nome-produto").value = ficha.nome || "";
+      document.getElementById("campo-rendimento").value = ficha.rendimento || "";
+      margemEscolhida = ficha.margem || 0.5;
+      (ficha.ingredientes || []).forEach(criarLinhaIngrediente);
+      (ficha.custosExtras || []).forEach(criarLinhaExtra);
+      document.getElementById("subtitulo-receita").textContent = "Editando ficha salva.";
+    }
+  } else if (idReceita) {
+    var receita = (typeof RECEITAS !== "undefined" ? RECEITAS : []).filter(function (r) {
+      return r.id === idReceita;
+    })[0];
+    if (receita) {
+      document.getElementById("campo-nome-produto").value = receita.titulo;
+      document.getElementById("campo-rendimento").value = receita.rendimento || "";
+      document.getElementById("subtitulo-receita").textContent =
+        "Vindo da receita \"" + receita.titulo + "\": falta só informar os preços.";
+      receita.ingredientesCalculo.forEach(function (ing) {
+        criarLinhaIngrediente({
+          nome: ing.nome,
+          quantidadeUsada: ing.quantidade,
+          unidadeUsada: ing.unidade,
+          unidadeEmbalagem: ing.unidade === "un" ? "un" : (ing.unidade === "ml" ? "l" : "kg"),
+        });
+      });
+    }
+  }
+
+  // Se nada preencheu nenhuma linha, começa com uma linha vazia: tela
+  // vazia é convite pra ação, não aviso de sistema.
+  if (listaIngredientesEl.children.length === 0) criarLinhaIngrediente();
+  if (listaExtrasEl.children.length === 0) criarLinhaExtra();
+
+  /* ---------- Botões de margem ---------- */
+  var MARGENS = [0.3, 0.4, 0.5, 0.6];
+  var gradeMargens = document.getElementById("grade-margens");
+  var ultimoCustoPorUnidade = 0;
+
+  function desenharBotoesMargem() {
+    gradeMargens.innerHTML = MARGENS.map(function (m) {
+      var preco = MDL.precoSugerido(ultimoCustoPorUnidade, m);
+      return (
+        '<button type="button" class="opcao-margem" data-margem="' + m + '" aria-pressed="' + (m === margemEscolhida) + '">' +
+          '<span class="percentual">' + Math.round(m * 100) + "%</span>" +
+          '<span class="preco numero">' + MDL.formatarMoeda(preco) + "</span>" +
+        "</button>"
+      );
+    }).join("");
+    gradeMargens.querySelectorAll(".opcao-margem").forEach(function (botao) {
+      botao.addEventListener("click", function () {
+        margemEscolhida = parseFloat(botao.dataset.margem);
+        desenharBotoesMargem();
+      });
+    });
+  }
+
+  /* ---------- Cálculo principal ---------- */
+  function calcular() {
+    var ingredientes = lerIngredientes();
+    var extras = lerExtras();
+    var rendimento = MDL.paraNumero(document.getElementById("campo-rendimento").value);
+
+    if (ingredientes.length === 0) {
+      window.alert("Adicione ao menos um ingrediente antes de calcular.");
+      return;
+    }
+    if (rendimento <= 0) {
+      window.alert("Informe quantas unidades essa receita rende (por exemplo, 12 fatias) antes de calcular.");
+      document.getElementById("campo-rendimento").focus();
+      return;
+    }
+
+    var totalIngredientes = 0;
+    for (var i = 0; i < ingredientes.length; i++) {
+      var resultado = MDL.calcularCustoIngrediente(ingredientes[i]);
+      if (!resultado.ok) {
+        window.alert(resultado.mensagem);
+        return;
+      }
+      totalIngredientes += resultado.custo;
+    }
+
+    var totalExtras = 0;
+    var temCustoEmbalagem = false;
+    var usouGramas = false;
+    extras.forEach(function (extra) {
+      totalExtras += MDL.paraNumero(extra.valor);
+      if (extra.tipo === "Embalagem" && MDL.paraNumero(extra.valor) > 0) temCustoEmbalagem = true;
+    });
+    ingredientes.forEach(function (ing) {
+      if (ing.unidadeUsada === "g") usouGramas = true;
+    });
+
+    var custoTotal = totalIngredientes + totalExtras;
+    var custoPorUnidade = custoTotal / rendimento;
+    ultimoCustoPorUnidade = custoPorUnidade;
+
+    // Compara com o histórico ANTES de salvar o novo registro.
+    var fichaAtual = fichaEmEdicaoId ? MDL.obterFichaPorId(fichaEmEdicaoId) : null;
+    var comparacao = fichaAtual ? MDL.compararComHistorico(fichaAtual.historico, custoPorUnidade) : null;
+
+    document.getElementById("aviso-sem-embalagem").hidden = temCustoEmbalagem;
+    document.getElementById("valor-custo-unidade").textContent = MDL.formatarMoeda(custoPorUnidade);
+
+    var avisoHistorico = document.getElementById("aviso-historico");
+    if (comparacao) {
+      var classe = comparacao.tipo === "alerta" ? "aviso-alerta" : (comparacao.tipo === "lucro" ? "aviso-lucro" : "aviso-info");
+      avisoHistorico.innerHTML = '<div class="aviso ' + classe + '">' + comparacao.mensagem + "</div>";
+    } else {
+      avisoHistorico.innerHTML = "";
+    }
+
+    desenharBotoesMargem();
+
+    var sugestoes = MDL.sugerirAfiliados({
+      usouGramas: usouGramas,
+      temCustoEmbalagem: temCustoEmbalagem,
+      rendimento: rendimento,
+    });
+    var containerAfiliado = document.getElementById("bloco-afiliado-container");
+    if (sugestoes.length > 0) {
+      document.getElementById("lista-sugestoes-afiliado").innerHTML = sugestoes.map(function (s) {
+        return "<li>" + s.texto + ' <a href="' + s.link + '" target="_blank" rel="noopener sponsored">' + s.rotulo + "</a></li>";
+      }).join("");
+      containerAfiliado.hidden = false;
+    } else {
+      containerAfiliado.hidden = true;
+    }
+
+    // Guarda os dados calculados no botão "salvar", para não recalcular tudo de novo.
+    document.getElementById("btn-salvar-ficha").dataset.custoPorUnidade = String(custoPorUnidade);
+
+    document.getElementById("area-resultado").hidden = false;
+    document.getElementById("area-resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("btn-calcular").addEventListener("click", calcular);
+
+  /* ---------- Salvar ficha ---------- */
+  document.getElementById("btn-salvar-ficha").addEventListener("click", function () {
+    var nome = document.getElementById("campo-nome-produto").value.trim();
+    if (!nome) {
+      window.alert("Dê um nome ao produto antes de salvar (ex.: \"Bolo de cenoura - fatia\").");
+      document.getElementById("campo-nome-produto").focus();
+      return;
+    }
+
+    var custoPorUnidade = parseFloat(this.dataset.custoPorUnidade || "0");
+    var lista = MDL.obterFichas();
+    var ficha = fichaEmEdicaoId ? MDL.obterFichaPorId(fichaEmEdicaoId) : null;
+
+    if (!ficha) {
+      ficha = {
+        id: MDL.gerarId(),
+        origemReceita: idReceita || null,
+        historico: [],
+      };
+      lista.push(ficha);
+      fichaEmEdicaoId = ficha.id;
+    }
+
+    ficha.nome = nome;
+    ficha.ingredientes = lerIngredientes();
+    ficha.custosExtras = lerExtras();
+    ficha.rendimento = MDL.paraNumero(document.getElementById("campo-rendimento").value);
+    ficha.margem = margemEscolhida;
+    ficha.historico = MDL.acrescentarHistorico(ficha.historico, custoPorUnidade);
+
+    var salvou = MDL.salvarFichas(lista);
+    if (salvou) {
+      window.alert('Ficha "' + nome + '" salva! Você pode consultá-la a qualquer momento em "Ficha técnica".');
+    } else {
+      window.alert("Não deu para salvar. O navegador pode estar em modo privado/anônimo, que não guarda dados.");
+    }
+  });
+})();
+</script>
+</body>
+</html>

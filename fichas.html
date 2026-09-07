@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha técnica: Meu Doce Lucro</title>
+<meta name="description" content="Suas fichas técnicas salvas: custo, preço sugerido e exportação para imprimir ou enviar a clientes e fornecedores.">
+<link rel="stylesheet" href="assets/estilo.css?v=14">
+<!-- media="print": esta folha só é usada pelo navegador na hora de imprimir. -->
+<link rel="stylesheet" href="assets/impressao.css?v=2" media="print">
+<link rel="icon" href="assets/logo.png">
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo somente-tela">
+  <div class="topo-conteudo">
+    <a href="index.html" class="marca"><img src="assets/logo.png" alt="Meu Doce Lucro"></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="index.html">Receitas</a></li>
+        <li><a href="calcular.html">Calcular custo</a></li>
+        <li><a href="fichas.html" aria-current="page">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo" class="somente-tela">
+  <div class="faixa-estreita">
+    <h1>Suas fichas técnicas</h1>
+
+    <div class="aviso aviso-info">
+      Estas fichas ficam salvas só neste aparelho (no navegador). Se
+      trocar de celular ou limpar os dados do navegador, elas somem.
+      Por isso, vale a pena imprimir ou exportar de vez em quando.
+    </div>
+
+    <div id="lista-vazia" hidden>
+      <p>Você ainda não salvou nenhuma ficha.</p>
+      <a class="btn btn-primario" href="calcular.html">Calcular o custo de um produto</a>
+    </div>
+
+    <div id="acoes-caderno" style="margin-bottom:1.25em;" hidden>
+      <button type="button" class="btn btn-secundario btn-bloco" id="btn-imprimir-caderno">
+        Imprimir caderno completo (todas as fichas)
+      </button>
+    </div>
+
+    <div id="lista-fichas"><!-- cartões de ficha entram aqui via JS --></div>
+  </div>
+</main>
+
+<footer class="rodape somente-tela">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra
+</footer>
+
+<!--
+  Área usada só na hora de imprimir. Fica vazia e escondida na tela
+  normal; o JavaScript preenche ela no instante de clicar em "imprimir"
+  e chama window.print() logo em seguida.
+-->
+<div id="area-impressao" class="somente-impressao"></div>
+
+<script src="assets/app.js?v=3"></script>
+<script src="assets/cadastro.js?v=2"></script>
+<script>
+(function () {
+  "use strict";
+
+  var listaFichasEl = document.getElementById("lista-fichas");
+  var listaVaziaEl = document.getElementById("lista-vazia");
+  var acoesCadernoEl = document.getElementById("acoes-caderno");
+
+  // Recalcula os números de uma ficha a partir dos dados salvos. Não
+  // reaproveitamos nenhum "custo pronto" guardado antigo: refazemos a
+  // conta com os mesmos preços que a pessoa informou da última vez,
+  // igual a calcular.html faz. O único valor histórico é o do
+  // gráfico de comparação (ficha.historico), nunca o custo em si.
+  function recomputar(ficha) {
+    var itens = (ficha.ingredientes || []).map(function (ing) {
+      var r = MDL.calcularCustoIngrediente(ing);
+      return { nome: ing.nome, custo: r.ok ? r.custo : 0 };
+    });
+    var totalIngredientes = itens.reduce(function (soma, i) { return soma + i.custo; }, 0);
+    var totalExtras = (ficha.custosExtras || []).reduce(function (soma, e) {
+      return soma + MDL.paraNumero(e.valor);
+    }, 0);
+    var custoTotal = totalIngredientes + totalExtras;
+    var custoPorUnidade = ficha.rendimento ? custoTotal / ficha.rendimento : 0;
+    return {
+      itens: itens,
+      totalIngredientes: totalIngredientes,
+      totalExtras: totalExtras,
+      custoTotal: custoTotal,
+      custoPorUnidade: custoPorUnidade,
+    };
+  }
+
+  function ultimaAtualizacao(ficha) {
+    if (!ficha.historico || ficha.historico.length === 0) return "-";
+    return MDL.formatarDataCurta(ficha.historico[ficha.historico.length - 1].data);
+  }
+
+  function desenharListaTela() {
+    var fichas = MDL.obterFichas();
+    if (fichas.length === 0) {
+      listaVaziaEl.hidden = false;
+      acoesCadernoEl.hidden = true;
+      listaFichasEl.innerHTML = "";
+      return;
+    }
+    listaVaziaEl.hidden = true;
+    acoesCadernoEl.hidden = false;
+
+    listaFichasEl.innerHTML = fichas.map(function (ficha) {
+      var calc = recomputar(ficha);
+      var preco = MDL.precoSugerido(calc.custoPorUnidade, ficha.margem || 0.5);
+      return (
+        '<div class="cartao ficha-card">' +
+          "<div>" +
+            "<h2 style=\"font-size:1.15rem; margin-bottom:0.15em;\">" + ficha.nome + "</h2>" +
+            '<p class="dica" style="margin-bottom:0.6em;">Atualizada em ' + ultimaAtualizacao(ficha) + "</p>" +
+            '<div class="acoes">' +
+              '<a class="btn btn-secundario" href="calcular.html?ficha=' + ficha.id + '">Editar / recalcular</a>' +
+              '<button type="button" class="btn btn-secundario" data-imprimir="' + ficha.id + '">Imprimir esta ficha</button>' +
+              '<button type="button" class="btn btn-perigo" data-excluir="' + ficha.id + '">Excluir</button>' +
+            "</div>" +
+          "</div>" +
+          '<div class="numeros">' +
+            '<div class="dica">Custo/unidade</div>' +
+            '<div class="custo numero">' + MDL.formatarMoeda(calc.custoPorUnidade) + "</div>" +
+            '<div class="dica">Sugestão de venda</div>' +
+            '<div class="numero">' + MDL.formatarMoeda(preco) + "</div>" +
+          "</div>" +
+        "</div>"
+      );
+    }).join("");
+
+    listaFichasEl.querySelectorAll("[data-excluir]").forEach(function (botao) {
+      botao.addEventListener("click", function () {
+        if (window.confirm('Excluir a ficha "' + botao.closest(".ficha-card").querySelector("h2").textContent + '"? Essa ação não pode ser desfeita.')) {
+          MDL.excluirFicha(botao.dataset.excluir);
+          desenharListaTela();
+        }
+      });
+    });
+    listaFichasEl.querySelectorAll("[data-imprimir]").forEach(function (botao) {
+      botao.addEventListener("click", function () {
+        imprimirFicha(botao.dataset.imprimir);
+      });
+    });
+  }
+
+  /* ---------- Geração do HTML de impressão ----------
+     Uma única função monta o "papel" de uma ficha. É usada tanto para
+     imprimir uma ficha sozinha quanto para montar o caderno completo
+     (uma chamada por ficha, uma página por chamada). */
+  function gerarHtmlFichaImpressao(ficha) {
+    var calc = recomputar(ficha);
+    var preco = MDL.precoSugerido(calc.custoPorUnidade, ficha.margem || 0.5);
+    var linhasIngredientes = calc.itens.map(function (i) {
+      return "<tr><td>" + i.nome + "</td><td>" + MDL.formatarMoeda(i.custo) + "</td></tr>";
+    }).join("");
+    var linhasExtras = (ficha.custosExtras || []).map(function (e) {
+      return "<tr><td>" + e.tipo + "</td><td>" + MDL.formatarMoeda(MDL.paraNumero(e.valor)) + "</td></tr>";
+    }).join("");
+
+    return (
+      '<div class="ficha-impressao">' +
+        "<h1>" + ficha.nome + "</h1>" +
+        "<p>Ficha gerada em " + MDL.formatarDataLonga(new Date()) + " · Rendimento: " + ficha.rendimento + " unidade(s)</p>" +
+        "<h2>Ingredientes</h2>" +
+        "<table><thead><tr><th>Item</th><th>Custo</th></tr></thead><tbody>" + linhasIngredientes + "</tbody></table>" +
+        (linhasExtras ? "<h2>Custos extras</h2><table><thead><tr><th>Item</th><th>Custo</th></tr></thead><tbody>" + linhasExtras + "</tbody></table>" : "") +
+        '<div class="resumo-final">' +
+          '<div class="linha"><span>Custo total</span><span>' + MDL.formatarMoeda(calc.custoTotal) + "</span></div>" +
+          '<div class="linha principal"><span>Custo por unidade</span><span>' + MDL.formatarMoeda(calc.custoPorUnidade) + "</span></div>" +
+          '<div class="linha principal"><span>Preço de venda sugerido (' + Math.round((ficha.margem || 0.5) * 100) + "% de margem)</span><span>" + MDL.formatarMoeda(preco) + "</span></div>" +
+        "</div>" +
+        '<div class="rodape-impressao"><img src="assets/logo.png" alt="Meu Doce Lucro" style="height:30px;width:auto;border-radius:0;margin:0 auto 4px;">meudocelucro.com.br</div>' +
+      "</div>"
+    );
+  }
+
+  function imprimirFicha(id) {
+    var ficha = MDL.obterFichaPorId(id);
+    if (!ficha) return;
+    document.getElementById("area-impressao").innerHTML =
+      '<div class="pagina-impressao">' + gerarHtmlFichaImpressao(ficha) + "</div>";
+    window.print();
+  }
+
+  // Caderno completo = a futura entrega paga (documento único, uma
+  // ficha por página). A função fica isolada de propósito: no futuro,
+  // dá para colocar uma verificação de pagamento bem no início dela,
+  // sem precisar mexer em mais nada no resto do site.
+  function imprimirCaderno() {
+    // TODO (futuro): verificar aqui se a pessoa já pagou pelo caderno
+    // completo antes de continuar. Enquanto não houver cobrança, a
+    // função gera o caderno livremente.
+    var fichas = MDL.obterFichas();
+    if (fichas.length === 0) return;
+    var html = fichas.map(function (ficha) {
+      return '<div class="pagina-impressao">' + gerarHtmlFichaImpressao(ficha) + "</div>";
+    }).join("");
+    document.getElementById("area-impressao").innerHTML = html;
+    window.print();
+  }
+
+  document.getElementById("btn-imprimir-caderno").addEventListener("click", imprimirCaderno);
+
+  desenharListaTela();
+})();
+</script>
+</body>
+</html>
