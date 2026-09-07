@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Doce Lucro: receitas e calculadora de custo para quem vende comida caseira</title>
+<meta name="description" content="Receitas de bolo, doce, salgado e marmita, com um clique direto para calcular quanto custa fazer e por quanto vender.">
+<link rel="stylesheet" href="assets/estilo.css?v=14">
+<link rel="icon" href="assets/logo.png">
+</head>
+<body>
+<a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <a href="index.html" class="marca"><img src="assets/logo.png" alt="Meu Doce Lucro"></a>
+    <nav aria-label="Navegação principal">
+      <ul class="nav-principal">
+        <li><a href="index.html" aria-current="page">Receitas</a></li>
+        <li><a href="calcular.html">Calcular custo</a></li>
+        <li><a href="fichas.html">Ficha técnica</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="faixa-abertura">
+  <div class="faixa-abertura-conteudo">
+    <h1>Você sabe quanto custa o que você vende?</h1>
+    <p>Escolha a receita, diga o preço que pagou nos ingredientes e
+    descubra o custo por unidade e por quanto vender.</p>
+    <a class="btn btn-primario" href="calcular.html">Calcular o custo agora</a>
+  </div>
+</section>
+
+<main id="conteudo">
+  <section aria-label="Lista de receitas">
+    <h2 style="margin-bottom:0.2em;">Receitas que já vêm com a conta certa</h2>
+    <p style="margin-bottom:0.7em;">Escolha uma receita, siga o passo a passo e, quando quiser saber
+    quanto custa fazer e por quanto vender, é um botão só, sem
+    cadastro, sem mensalidade.</p>
+
+    <div class="grade-receitas" id="grade-receitas">
+      <!-- Preenchido pelo JavaScript abaixo, a partir de assets/receitas.js -->
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  Meu Doce Lucro · meudocelucro.com.br · por Gledson Agra<br>
+  Seus dados de cálculo ficam salvos só neste aparelho, no seu navegador.
+</footer>
+
+<script src="assets/receitas.js?v=3"></script>
+<script src="assets/app.js?v=3"></script>
+<script>
+  // Monta os cartões da home a partir da lista em assets/receitas.js.
+  // Fazer isso por JavaScript evita repetir o mesmo bloco de HTML de
+  // cartão em vários lugares: some uma receita nova só na lista, e o
+  // cartão aparece aqui sozinho.
+  (function () {
+    var grade = document.getElementById("grade-receitas");
+    var html = RECEITAS.map(function (receita) {
+      return (
+        '<a class="receita-card" href="' + receita.url + '">' +
+          '<div class="imagem-espaco">' +
+            (receita.foto
+              ? '<img src="assets-fotos/' + receita.foto + '" alt="' + receita.titulo + '" loading="lazy" onerror="this.remove()">'
+              : "") +
+          "</div>" +
+          '<div class="conteudo">' +
+            "<h2>" + receita.titulo + "</h2>" +
+            '<p class="resumo">' + receita.resumo + "</p>" +
+            '<div class="meta">' +
+              "<span>⏱ " + receita.tempoPreparo + "</span>" +
+              "<span>🍽 rende " + receita.rendimento + " " + receita.unidadeRendimento + "</span>" +
+            "</div>" +
+            '<span class="chamada-custo">Ver quanto custa fazer</span>' +
+          "</div>" +
+        "</a>"
+      );
+    }).join("");
+    grade.innerHTML = html;
+  })();
+</script>
+</body>
+</html>
